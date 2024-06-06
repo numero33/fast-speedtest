@@ -17,8 +17,13 @@ const (
 	parallelConnections = 5
 )
 
-var reFastComScript = regexp.MustCompile(`(?m)<script\s+src="\/(\S+)">`)
-var reFastComToken = regexp.MustCompile(`(?mU)token:"(\S+)"`)
+var (
+	reFastComScript = regexp.MustCompile(`(?m)<script\s+src="\/(\S+)">`)
+	reFastComToken  = regexp.MustCompile(`(?mU)token:"(\S+)"`)
+
+	commit  = ""
+	version = "dev"
+)
 
 type APIResponse struct {
 	Client struct {
@@ -49,12 +54,20 @@ type TestResult struct {
 
 func init() {
 	// init logger
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMicro
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339Nano})
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	if version == "dev" {
+		zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMicro
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339Nano})
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+
 }
 
 func main() {
+
+	log.Info().Str("version", version).Str("commit", commit).Msg("Starting fast-speedtest")
 
 	//startTest()
 	http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
