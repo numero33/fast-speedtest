@@ -2,7 +2,8 @@ FROM golang:alpine as builder
 
 RUN mkdir -p /go/src/github.com/numero33/fast-speedtest
 WORKDIR /go/src/github.com/numero33/fast-speedtest
-COPY main.go .
+COPY *.go .
+COPY go.* .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-s -w' -o build/fast-speedtest
 

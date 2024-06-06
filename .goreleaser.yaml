@@ -42,6 +42,15 @@ archives:
           - goos: windows
             format: zip
 
+# dockers:
+#     - image_templates:
+#           - "ghcr.io/numero33/fast-speedtest:{{ .Tag }}"
+#           - "ghcr.io/numero33/fast-speedtest:v{{ .Major }}"
+#           - "ghcr.io/numero33/fast-speedtest:v{{ .Major }}.{{ .Minor }}"
+#           - "ghcr.io/numero33/fast-speedtest:latest"
+#       dockerfile: ci/Dockerfile-goreleaser
+#       use: buildx
+
 changelog:
     sort: asc
     filters:

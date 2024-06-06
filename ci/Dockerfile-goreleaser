@@ -1,0 +1,4 @@
+# Dockerfile
+FROM scratch
+COPY fast-speedtest /usr/bin/fast-speedtest
+ENTRYPOINT ["/usr/bin/fast-speedtest"]
