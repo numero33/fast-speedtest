@@ -46,7 +46,7 @@ func startUploadTest(targets []Target) float64 {
 		totalTime += result.TotalTime
 	}
 
-	speed := (float64(totalSize * uint64(time.Second))) / float64(totalTime) * parallelConnections
+	speed := (float64(totalSize * uint64(time.Second))) / float64(totalTime) * float64(parallelConnections)
 
 	log.Debug().Dur("totalTime", totalTime).Uint64("totalSize", totalSize).Float64("speed", speed/1e3/1e3*8).Msg("UploadSpeed")
 

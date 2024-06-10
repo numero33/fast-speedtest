@@ -7,14 +7,12 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"time"
 )
 
 const (
-	downloadDuration    = 30 * time.Second
-	uploadDuration      = 30 * time.Second
-	uploadBufferSize    = 26 * 1024 * 1024
-	parallelConnections = 5
+	uploadBufferSize = 26 * 1024 * 1024
 )
 
 var (
@@ -23,6 +21,11 @@ var (
 
 	commit  = ""
 	version = "dev"
+
+	parallelConnections = 5
+
+	downloadDuration = 30 * time.Second
+	uploadDuration   = 30 * time.Second
 )
 
 type APIResponse struct {
@@ -63,15 +66,40 @@ func init() {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
+	// read env vars parallelConnections
+	if os.Getenv("PARALLEL_CONNECTIONS") != "" {
+		i, err := strconv.Atoi(os.Getenv("PARALLEL_CONNECTIONS"))
+		if err != nil {
+			log.Fatal().Err(err).Msg("Error reading PARALLEL_CONNECTIONS")
+		}
+		parallelConnections = i
+	}
+	if os.Getenv("DOWNLOAD_DURATION_SEC") != "" {
+		i, err := strconv.Atoi(os.Getenv("DOWNLOAD_DURATION_SEC"))
+		if err != nil {
+			log.Fatal().Err(err).Msg("Error reading DOWNLOAD_DURATION_SEC")
+		}
+		downloadDuration = time.Duration(i) * time.Second
+	}
+	if os.Getenv("UPLOAD_DURATION_SEC") != "" {
+		i, err := strconv.Atoi(os.Getenv("UPLOAD_DURATION_SEC"))
+		if err != nil {
+			log.Fatal().Err(err).Msg("Error reading UPLOAD_DURATION_SEC")
+		}
+		uploadDuration = time.Duration(i) * time.Second
+	}
+
 }
 
 func main() {
 
 	log.Info().Str("version", version).Str("commit", commit).Msg("Starting fast-speedtest")
+	log.Info().Int("parallelConnections", parallelConnections).Float64("downloadDurationSec", downloadDuration.Seconds()).Float64("uploadDurationSec", uploadDuration.Seconds()).Msg("Config")
 
 	//startTest()
 	http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		downloadSpeed, uploadSpeed := startTest()
+		log.Info().Float64("downloadSpeed", downloadSpeed).Float64("uploadSpeed", uploadSpeed).Msg("Speedtest results")
 		w.Header().Add("content-type", "text/plain")
 		w.Write([]byte("# TYPE speedtest_bits_per_second gauge\n"))
 		w.Write([]byte("# HELP speedtest_bits_per_second Speed measured against fast.com\n"))
